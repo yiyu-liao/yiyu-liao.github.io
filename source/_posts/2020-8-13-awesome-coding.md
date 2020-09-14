@@ -6,7 +6,9 @@ date:   2020-07-23
 tags: js
 ---
 
-1. Given an unordered array of integers and a value sum, return true if any two items may be added such that they equal the value of sum . Otherwise, return false.
+### findSum
+
+> Given an unordered array of integers and a value sum, return true if any two items may be added such that they equal the value of sum . Otherwise, return false.
 
 ```js
 
@@ -26,8 +28,22 @@ const findSum = (arr, val) => {
 
 ```
 
-### awesome way
+awesome way
 
 ```js
 const findSum = (arr, sum) => arr.some(set => n => set.has(n) || !set.add(sum - n)(new Set);
+```
+
+### Method Parameter Validation
+
+```js
+const isRequired = () => {  throw new Error('param is requied') };
+
+const print = (num = isRequired()) => console.log(num);
+```
+
+### Format JSON Code
+
+```js
+JSON.stringify({"name": "Jack"}, null '\t');
 ```
