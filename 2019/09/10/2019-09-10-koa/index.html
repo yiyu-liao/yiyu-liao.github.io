@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Koa2学习笔记</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2019/09/10/2019-09-10-koa/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">CoreHubx</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Koa2学习笔记</h1>
+            <p class="meta">
+                <time datetime="2019-09-09T16:00:00.000Z" data-updated="true">Tue Sep 10 2019</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>最近公司的技术分享涉及Koa，于是重新刷了一遍，学习过程中主要思考了以下几个问题：</p>
+<ul>
+<li>koa的应用场景</li>
+<li>koa的优势</li>
+<li>koa内部是如何实现的？</li>
+</ul>
+<h3 id="一、Koa的应用场景"><a href="#一、Koa的应用场景" class="headerlink" title="一、Koa的应用场景"></a>一、Koa的应用场景</h3><p>任何东西的出现都有其合理性, Koa是为了更方便构建http服务而诞生的一个NodeJs框架。没错，只会Js的你也可以curl了。</p>
+<h3 id="二、koa的优势"><a href="#二、koa的优势" class="headerlink" title="二、koa的优势"></a>二、koa的优势</h3><p>Koa的优势总结下来有两点: </p>
+<ul>
+<li>1.更轻量化，小而美。</li>
+<li>2.洋葱模型，更好地控制中间件服务的异步逻辑。</li>
+</ul>
+<p>在Koa出现之前其实还有Express框架，Koa也是Express原班人马打造的。Express可以理解为http服务的大杂烩，各种功能应有尽有，并且都放在一起实现。既然有前者的经验铺路，Koa的实现更加精简，只负责核心逻辑，想要什么功能，则通过中间件的形式引入就行，好比如打火锅，想吃什么就把什么加进入。</p>
+<p>在学习的过程中，也参考了很多学习资料，很多都提起看了koa的洋葱模型，通篇下来解释了一遍，我还是有不少疑惑。</p>
+<p>我一直在想，洋葱模型，究竟适合什么业务场景？</p>
+<p>asyn await语法的出现在一定程度来说，有推进Koa2的发展，使得异步处理逻辑更加清晰。举个🌰</p>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">log</span>(<span class="params">ctx, next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> requestTime =  <span class="keyword">new</span> <span class="built_in">Date</span>().valueOf();</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;ctx.url&#125;</span> duration: <span class="subst">$&#123;<span class="keyword">new</span> <span class="built_in">Date</span>().valueOf() - requestTime&#125;</span>`</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">&#x27;/&#x27;</span>, log, <span class="function"><span class="params">ctx</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// do someting</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p> 因为存在一些语法糖，通过promise还原上述代码：</p>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">log</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">reslove, reject</span>) =&gt;</span> &#123;</span><br><span class="line">       <span class="keyword">let</span> requestTime =  <span class="keyword">new</span> <span class="built_in">Date</span>().valueOf();</span><br><span class="line">       next().then(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">           <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;ctx.url&#125;</span> duration: <span class="subst">$&#123;<span class="keyword">new</span> <span class="built_in">Date</span>().valueOf() - requestTime&#125;</span>`</span>);</span><br><span class="line">       &#125;).then(reslove)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 也就是说，调用next会给我们返回一个promise对象，而promise何时会resolve就是koa内部源码做的处理。</p>
+<p> 再详细分析下koa的洋葱模型上诉处理流程：</p>
+<ol>
+<li>获取当前时间戳requestTime</li>
+<li>调用next()执行后续的中间件，并监听回调</li>
+<li>第二个中间件可能会调用第三个、第四个、第五个, 但这不是log所关心的，log只关心第二个中间件什么适合resolve，而第二个中间件的resolve则依赖他后边的中间件resolve</li>
+<li>第二个中间件resolve，意味着后面的中间件执行，并且全部resolve了，此时才会执行log中next后面的代码。</li>
+</ol>
+<blockquote>
+<p>本文只是以log为例子，简单介绍了一下koa中间件的一些核心概念，在真正的业务场景当然不会这么简单。</p>
+</blockquote>
+<p>koa中间件存在的真正意义是什么？我又陷入了思考，谈下我个人的理解。客户端发送一次http请求，服务端在响应数据给客户端之前，可以通过中间件的组合，进行拦截处理。比如，整合请求参数、对请求的url进行差异化处理，查询数据等等，因为有asyn await的支持，中间件的编写从代码的优雅性来说，避免了then,callback的写法，总体来说还是挺舒服的～</p>
+<h3 id="三、koa内部是如何实现的？"><a href="#三、koa内部是如何实现的？" class="headerlink" title="三、koa内部是如何实现的？"></a>三、koa内部是如何实现的？</h3><p>打开koa的源码，发现核心code都放到了lib下，分别有如下几个文件：</p>
+<ul>
+<li>application.js</li>
+<li>contenxt.js</li>
+<li>request.js</li>
+<li>response.js</li>
+</ul>
+<p>koa把NodeJs原生请求与响应重新封装了一遍，通过get, set的方式获取数据以及修改数据，并整合到context中。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> koa <span class="keyword">from</span> <span class="string">&#x27;koa&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> koa();</span><br><span class="line"></span><br><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    ctx.body = <span class="string">&#x27;hello world~&#x27;</span>;</span><br><span class="line">    next();</span><br><span class="line">&#125;)</span><br><span class="line">app.listen(<span class="number">8000</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// callback</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>通过几行简单的代码就可以开启一个http服务，试想下如果通过原生的createHttpServe, 得花多大的劲，源码不难理解，如果你去刷一遍源码，就可以感觉到前面为什么说koa小而美了。</p>
+<p>阅读源码过后，有以下三点我觉得是比较有意思的：</p>
+<ol>
+<li>客户端请求一次，koa内部都会通过const ctx = this.createContext(req, res)重新创建一个context对象, 源码如下：</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">callback</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> fn = compose(<span class="built_in">this</span>.middleware);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">this</span>.listenerCount(<span class="string">&#x27;error&#x27;</span>)) <span class="built_in">this</span>.on(<span class="string">&#x27;error&#x27;</span>, <span class="built_in">this</span>.onerror);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> handleRequest = <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> ctx = <span class="built_in">this</span>.createContext(req, res);</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">this</span>.handleRequest(ctx, fn);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> handleRequest;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="2">
+<li>koa实际上是继承NodeJs的Emitter事件的，为什么需要这样做？ 很重要的一个原因是koa提供订阅/发布功能，如果程序发生异常，就可以调用ctx.onerror(err)，监听事件集中处理异常情况，源码如下：</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">handleRequest</span>(<span class="params">ctx, fnMiddleware</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> res = ctx.res;</span><br><span class="line">    res.statusCode = <span class="number">404</span>;</span><br><span class="line">    <span class="keyword">const</span> onerror = <span class="function"><span class="params">err</span> =&gt;</span> ctx.onerror(err);</span><br><span class="line">    <span class="keyword">const</span> handleResponse = <span class="function">() =&gt;</span> respond(ctx);</span><br><span class="line">    onFinished(res, onerror);</span><br><span class="line">    <span class="keyword">return</span> fnMiddleware(ctx).then(handleResponse).catch(onerror);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="3">
+<li>中间件的处理逻辑</li>
+</ol>
+<p>如下，通过use方法，函数作为use方法的参数（函数的参数固定，第一个参数为context，第二个参数为next，表示下一个中间件函数），创建了三个中间件，内部的处理依次调用this.middleware.push(fn)，将use的参数塞进数组中。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    ctx.body = <span class="string">&#x27;1&#x27;</span></span><br><span class="line">    next()</span><br><span class="line">&#125;);</span><br><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    ctx.body = <span class="string">&#x27;2&#x27;</span></span><br><span class="line">    next()</span><br><span class="line">&#125;);</span><br><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    ctx.body = <span class="string">&#x27;3&#x27;</span></span><br><span class="line">    next()</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>koa洋葱模型的核心代码就是<a target="_blank" rel="noopener" href="https://github.com/koajs/compose">koa-compose</a>库，代码只有短短的几十行，牛逼～</p>
+<p>客户端进行请求，触发compose(this.middleware), 从源码我们发现，此时自动执行第一个中间件，从而顺序遍历middleware所有元素，递归执行dispatch，此时洋葱由外到内，直至所有中间件都执行完成后，resolve, 洋葱从内到外，源码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span> (<span class="params">middleware</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">Array</span>.isArray(middleware)) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">&#x27;Middleware stack must be an array!&#x27;</span>)</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> fn <span class="keyword">of</span> middleware) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">&#x27;function&#x27;</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">&#x27;Middleware must be composed of functions!&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@param <span class="type">&#123;Object&#125;</span> <span class="variable">context</span></span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@return <span class="type">&#123;Promise&#125;</span></span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@api <span class="variable">public</span></span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">context, next</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// last called middleware #</span></span><br><span class="line">    <span class="keyword">let</span> index = -<span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> dispatch(<span class="number">0</span>)</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span> (<span class="params">i</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (i &lt;= index) <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">&#x27;next() called multiple times&#x27;</span>))</span><br><span class="line">      index = i</span><br><span class="line">      <span class="keyword">let</span> fn = middleware[i]</span><br><span class="line">      <span class="keyword">if</span> (i === middleware.length) fn = next</span><br><span class="line">      <span class="keyword">if</span> (!fn) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve()</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(fn(context, dispatch.bind(<span class="literal">null</span>, i + <span class="number">1</span>)));</span><br><span class="line">      &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面我们知道，中间件的注册是通过如下的形式</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">//do something</span></span><br><span class="line"></span><br><span class="line">  next();</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>敲黑板，留意这行代码<code>Promise.resolve(fn(context, dispatch.bind(null, i + 1)))</code>, 其中dispatch.bind(null, i + 1))就是next(), koa内部会将我们手动执行下一个中间件。</p>
+<h3 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h3><p>或许有一天专门跑去写NodeJs了呢?  哈哈</p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2019-09-09T16:00:00.000Z" data-updated="true">Tue Sep 10 2019</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/NodeJs/">NodeJs</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=Koa2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/" title="Previous Post: Babel学习笔记">« Babel学习笔记</a>
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: Git多账户ssh配置">Git多账户ssh配置 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20-xmind/">snabbdom实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/2020-09-13-summary-for-25/">关于二十五岁的一些感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23-tree/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13-awesome-coding/">Awesome Coding for js</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/work-summary/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20-error-handle/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12-graphql/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01-flag/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27-auto-deploy/">利用git hooks快速部署node服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/17/2020-03-17-summary/">迟来的总结</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

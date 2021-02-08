@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Babel学习笔记</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2019/10/30/2019-10-30-learn-babel/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">CoreHubx</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Babel学习笔记</h1>
+            <p class="meta">
+                <time datetime="2019-10-29T16:00:00.000Z" data-updated="true">Wed Oct 30 2019</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>Babel是Javascript编译器，将ECMAScript 2015+版本的代码转换成向后兼容的js代码</p>
+<p>基本编译流程：</p>
+<p>首先babel对原代码进行词法分析（Tokenize），将原代码分割成Tokens数组, Tokens包括语法片段，位置信息，以及一些类型信息，接下来对Tokens进行词法解释，Parser转换成ATS（Abstract Syntax Tree), 以树结构的形式表示代码结构，AST是babel转译的核心数据结构，后续的操作都依赖于AST。得到AST后，babel进入转换阶段（Transform），babel对AST进行遍历，所有插件的应用都在此阶段进行。最后将AST转换成js, 在此阶段生产Source Map。</p>
+<p>简单来说：source code通过babel得到AST, 根据定义的规则修改AST，最终输入。</p>
+<p>🌰：<code>let/const</code>转化为<code>var</code>, <code>() =&gt; &#123;&#125;</code>箭头函数转化为<code>function() &#123;&#125;</code></p>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><h4 id="1-安装依赖"><a href="#1-安装依赖" class="headerlink" title="1.安装依赖"></a>1.安装依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev @babel&#x2F;core @babel&#x2F;cli @babel&#x2F;preset-env</span><br><span class="line">npm install --save @babel&#x2F;polyfill</span><br></pre></td></tr></table></figure>
+<h4 id="2-在根目录创建配置文件babel-config-js"><a href="#2-在根目录创建配置文件babel-config-js" class="headerlink" title="2.在根目录创建配置文件babel.config.js"></a>2.在根目录创建配置文件babel.config.js</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> presets = [</span><br><span class="line">  [</span><br><span class="line">    <span class="string">&quot;@babel/env&quot;</span>,</span><br><span class="line">    &#123;</span><br><span class="line">      targets: &#123;</span><br><span class="line">        edge: <span class="string">&quot;17&quot;</span>,</span><br><span class="line">        firefox: <span class="string">&quot;60&quot;</span>,</span><br><span class="line">        chrome: <span class="string">&quot;67&quot;</span>,</span><br><span class="line">        safari: <span class="string">&quot;11.1&quot;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      useBuiltIns: <span class="string">&quot;usage&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  ],</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; presets &#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="3-命令行操作"><a href="#3-命令行操作" class="headerlink" title="3.命令行操作"></a>3.命令行操作</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./node_modules/.bin/babel src --out-dir lib</span><br></pre></td></tr></table></figure>
+<p>以上命令的意思是解释scr目录下所有js文件，并且按照定义好的转换规则(babel.config.js)输出到lib目录下</p>
+<h3 id="实际场景例子"><a href="#实际场景例子" class="headerlink" title="实际场景例子"></a>实际场景例子</h3><p>eg: 在development环境，往往需要console.log进行调试，product环境面对的是用户，log记录就不应该存在了，为了避免开发人员遗留的log, 可通过babel插件去除log代码</p>
+<p>以下为配置文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> plugins = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (process.env.NODE_ENV !== <span class="string">&#x27;development&#x27;</span>) &#123;</span><br><span class="line">    <span class="comment">// https://www.babeljs.cn/docs/babel-plugin-transform-remove-console</span></span><br><span class="line">    plugins.push(<span class="string">&#x27;transform-remove-console&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    plugins</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="开发一个babel插件"><a href="#开发一个babel插件" class="headerlink" title="开发一个babel插件"></a>开发一个babel插件</h3><p>babel插件模块，需要暴露一个function, function包含visitor(详细写是不可能的，这辈子都不可能详细写的。因为我菜啊～～)</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> (<span class="params">babel</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> t = babel.types;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    visitor: &#123; </span><br><span class="line">      <span class="function"><span class="title">ArrayExpression</span>(<span class="params">path, state</span>)</span> &#123;</span><br><span class="line">        path.replaceWith(</span><br><span class="line">          t.callExpression(</span><br><span class="line">            t.memberExpression(t.identfier(<span class="string">&#x27;mori&#x27;</span>), t.identifier(<span class="string">&#x27;vector&#x27;</span>)),</span><br><span class="line">            path.node.elements</span><br><span class="line">          )</span><br><span class="line">        )</span><br><span class="line">      &#125;,</span><br><span class="line">      ....</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有几个关键概念需要解释下：</p>
+<ul>
+<li><code>babel.type</code>: 用来操作AST节点，如创建，转换，校验等</li>
+<li><code>visitor</code>：babel采用深度遍历访问每个AST节点，如上述代码，遍历到<code>ArrayExpression</code>时，触发定义好到函数；</li>
+<li><code>path</code>: path是指AST节点对象，包含节点的信息，所在位置以及节点间的关系</li>
+<li><code>state</code>: 指插件状态，可以通过state获取插件中的配置参数</li>
+</ul>
+<p>需要注意什么</p>
+<p>Scope作用域</p>
+<p>在Js中，每当你创建一个引用，不管是通过变量（variable）, 函数（function），参数（params）等，<br>它都属于当前作用域。</p>
+<p>在编写一个转换时，我们得确保在改变代码得各个部分不会破坏已经存在的代码。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Evan-Liao/blog/tree/master/Babel/test.js">demo</a></p>
+<blockquote>
+<p>node demo.js</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var test &#x3D; [1, 2, 3]</span><br><span class="line">&#x2F;&#x2F;transform</span><br><span class="line">demo.init(1,2,3)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>github传送门：<a target="_blank" rel="noopener" href="https://github.com/yiyu-liao/learn-babel">https://github.com/yiyu-liao/learn-babel</a></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>全文写下来，还是有很多陌生的概念，那就当一个学习笔记吧～</p>
+<h3 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://astexplorer.net/#/KJ8AjD6maa">AST在线转换</a></li>
+</ul>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2019-10-29T16:00:00.000Z" data-updated="true">Wed Oct 30 2019</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Babel/">Babel</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=Babel%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/" title="Previous Post: Apply/Call/Bind的一些用法">« Apply/Call/Bind的一些用法</a>
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: Koa2学习笔记">Koa2学习笔记 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20-xmind/">snabbdom实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/2020-09-13-summary-for-25/">关于二十五岁的一些感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23-tree/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13-awesome-coding/">Awesome Coding for js</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/work-summary/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20-error-handle/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12-graphql/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01-flag/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27-auto-deploy/">利用git hooks快速部署node服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/17/2020-03-17-summary/">迟来的总结</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>
