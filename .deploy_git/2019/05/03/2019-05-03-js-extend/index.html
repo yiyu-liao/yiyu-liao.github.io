@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Js实现原生继承的几种方式</title>
+
+    <meta name="author" content="yiyu-liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://yoursite.com/2019/05/03/2019-05-03-js-extend/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://yoursite.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Js实现原生继承的几种方式</h1>
+            <p class="meta">
+                <time datetime="2019-05-02T16:00:00.000Z" data-updated="true">Fri May 03 2019</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h4 id="1-原型链继承"><a href="#1-原型链继承" class="headerlink" title="1.原型链继承"></a>1.原型链继承</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">fucntion SuperType() &#123;</span><br><span class="line"> <span class="keyword">this</span>.name = <span class="string">'hello'</span></span><br><span class="line">&#125;</span><br><span class="line">SuperType.prototype.getName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SubType</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"> <span class="keyword">this</span>.subName = <span class="string">'enen'</span></span><br><span class="line">&#125;</span><br><span class="line">SubType.prototype = <span class="keyword">new</span> SuperType()</span><br><span class="line">SubType.prototype.getSubName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="keyword">this</span>.subName;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> instance = <span class="keyword">new</span> SubType();</span><br><span class="line">instance.getName() <span class="comment">// hello</span></span><br></pre></td></tr></table></figure>
+
+<p>缺点： </p>
+<p>1.所有实例共享原型属性，当原型某个属性为引用类型，改属性的修改会对所有创建的实例造成影响。</p>
+<p>2.无法向super类传递参数</p>
+<h4 id="借助构造函数"><a href="#借助构造函数" class="headerlink" title="借助构造函数"></a>借助构造函数</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">fucntion SuperType() &#123;</span><br><span class="line"> <span class="keyword">this</span>.names = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">&#125;</span><br><span class="line">SuperType.prototype.getName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="keyword">this</span>.names;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SubType</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  SuperType.call(<span class="keyword">this</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> instance1 = <span class="keyword">new</span> SubType();</span><br><span class="line">instance.names.push(<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance2 = <span class="keyword">new</span> SubType();</span><br><span class="line"></span><br><span class="line">instance1.names <span class="comment">// 1, 2, 3, 4</span></span><br><span class="line">instance1.names <span class="comment">// 1, 2, 3</span></span><br></pre></td></tr></table></figure>
+
+<p>缺点： 方法都在构造函数中，函数无法复用</p>
+<h4 id="组合继承"><a href="#组合继承" class="headerlink" title="组合继承"></a>组合继承</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SuperType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">SuperType.prototype.sayName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SubType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    SuperType.call(<span class="keyword">this</span>, name);</span><br><span class="line">    <span class="keyword">this</span>.age = age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">SubType.prototype = <span class="keyword">new</span> SuperType()</span><br><span class="line">SubType.prototype.constructor = SubType()</span><br></pre></td></tr></table></figure>
+
+<p>缺点：在SuperType.call(this, name), SubType.prototype = new SuperType()中调用了两次SuperType的构造函数。</p>
+<h4 id="寄生组合式继承"><a href="#寄生组合式继承" class="headerlink" title="寄生组合式继承"></a>寄生组合式继承</h4><p>通过借用构造函数来继承属性，通过原型链的混成模式继承方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">inherPrototype</span>(<span class="params">subType, superType</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> prototype = object(superType.prototype);</span><br><span class="line">    prototype.constructor = subType;</span><br><span class="line">    subType.prototype = prototype;    </span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">object</span>(<span class="params">o</span>) </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">F</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line">    F.prototype = o;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> F()    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SuperType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">    <span class="keyword">this</span>.colors = [<span class="string">'red'</span>]</span><br><span class="line">&#125;</span><br><span class="line">SuperType.prototype.sayName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SubType</span>(<span class="params">name, age</span>) </span>&#123;</span><br><span class="line">    SuperType.call(<span class="keyword">this</span>, name);</span><br><span class="line">    <span class="keyword">this</span>.age = age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">inherPrototype(SubType, SuperType);</span><br></pre></td></tr></table></figure>
+
+<p>inherPrototype看起来比较绕，以上可通过Object.create()更加清晰实现</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SuperType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">    <span class="keyword">this</span>.colors = [<span class="string">'red'</span>]</span><br><span class="line">&#125;</span><br><span class="line">SuperType.prototype.sayName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">SubType</span>(<span class="params">name, age</span>) </span>&#123;</span><br><span class="line">    SuperType.call(<span class="keyword">this</span>, name);</span><br><span class="line">    <span class="keyword">this</span>.age = age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">SubType.prototype = <span class="built_in">Object</span>.create(SuperType.prototype);</span><br><span class="line">SubType.prototype.constructor = SubType;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">yiyu-liao</span></span>
+                <time datetime="2019-05-02T16:00:00.000Z" data-updated="true">Fri May 03 2019</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Javascript/">Javascript</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           href="https://twitter.com/intent/tweet?text=Js%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%94%9F%E7%BB%A7%E6%89%BF%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/2019/06/24/2019-06-24-git-ssh/index.html" title="Previous Post: Git多账户ssh配置">« Git多账户ssh配置</a>
+                
+
+                
+                <a class="basic-alignment right" href="/2019/04/09/2019-04-09-gc/index.html" title="Previous Post: Js中变量GC垃圾回收的一些思考">Js中变量GC垃圾回收的一些思考 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11-about-frontend/">当team只有一个前端人力</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20-xmind/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23-tree/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13-awesome-coding/">Awesome Coding for js</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/work-summary/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20-error-handle/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12-graphql/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01-flag/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27-auto-deploy/">利用git hooks快速部署node服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/17/2020-03-17-summary/">迟来的总结</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a href="https://github.com/yiyu-liao" target="_blank" rel="noopener">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - yiyu-liao -
+        <span class="credit">Generated using <a href="https://github.com/jbreckmckye/hexo-theme-octo" target="_blank" rel="noopener">Octo theme</a> for <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

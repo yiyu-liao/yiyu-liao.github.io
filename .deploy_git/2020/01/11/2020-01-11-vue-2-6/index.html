@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Vue 2.x数据驱动源码分析</title>
+
+    <meta name="author" content="yiyu-liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://yoursite.com/2020/01/11/2020-01-11-vue-2-6/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://yoursite.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Vue 2.x数据驱动源码分析</h1>
+            <p class="meta">
+                <time datetime="2020-01-10T16:00:00.000Z" data-updated="true">Sat Jan 11 2020</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近看源码看得有点上头，趁着周末有空就记录下。之前和同事谈论过，他们对源码都不以为意，停留在一种框架停留在能用就行了，看看官方文档，能解决覆盖80%，甚至更多的业务场景了。对于我来说，使用vue已经很长一段时间了，如何对内部实现还是不清楚的话，我自己本身也说不过去的，关键是有时候遇到一些问题，只有理解内部是如何进行的，才能很好地找到合理的解决方案，而不是老是黑人问号“为什么会这样？”</p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>众所周知，vue内部遍历data对象，对数据进行每个劫持，重新定义了get, set方法。set方法很好理解，就是改变值时候触发，那get方法是什么时候触发的呢？</p>
+<p>引用官方文档的概述，如下：</p>
+<blockquote>
+<p>当你把一个普通的 JavaScript 对象传入 Vue 实例作为 data 选项，Vue 将遍历此对象所有的属性，并使用 Object.defineProperty 把这些属性全部转为 getter/setter。Object.defineProperty 是 ES5 中一个无法 shim 的特性，这也就是 Vue 不支持 IE8 以及更低版本浏览器的原因。<br>这些 getter/setter 对用户来说是不可见的，但是在内部它们让 Vue 能够追踪依赖，在属性被访问和修改时通知变更。这里需要注意的是不同浏览器在控制台打印数据对象时对 getter/setter 的格式化并不同，所以建议安装 vue-devtools 来获取对检查数据更加友好的用户界面。<br>每个组件实例都对应一个 watcher 实例，它会在组件渲染的过程中把“接触”过的数据属性记录为依赖。之后当依赖项的 setter 触发时，会通知 watcher，从而使它关联的组件重新渲染。</p>
+</blockquote>
+<h3 id="mouted"><a href="#mouted" class="headerlink" title="mouted"></a>mouted</h3><p>简单分析一波源码～～那就从入口说起吧。</p>
+<p>现在vue2.x版本一般是通过官方脚手架进行搭建，在<code>src/main.js</code>目录下，会看到这样的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> Vue(&#123;</span><br><span class="line">    router: router,</span><br><span class="line">    store,</span><br><span class="line">    i18n,</span><br><span class="line">    render: <span class="function"><span class="params">h</span> =&gt;</span> h(App)</span><br><span class="line">&#125;).$mount(<span class="string">'#app'</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Vue.prototype.$mount = <span class="function"><span class="keyword">function</span> (<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  el?: string | Element,</span></span></span><br><span class="line"><span class="function"><span class="params">  hydrating?: boolean</span></span></span><br><span class="line"><span class="function"><span class="params"></span>): <span class="title">Component</span> </span>&#123;</span><br><span class="line">  el = el &amp;&amp; inBrowser ? query(el) : <span class="literal">undefined</span></span><br><span class="line">  <span class="keyword">return</span> mountComponent(<span class="keyword">this</span>, el, hydrating)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至于传入的参数是怎样处理的，我们暂时放到一边，一目了然，new了一个vue实例，并且调用了<code>$mount</code>方法。</p>
+<p>new Vue()的时候，调用<code>this._init</code>方法，其中这里对data对象中所有属性利用Object.defineProperty, 进行geter/seter处理。</p>
+<p>vue对<code>web/weex</code>不同平台运行环境进行了差异化处理，以web平台分析，我们看到<code>$mount</code>的赋值如下，所有在入口其实是调用了<code>mountComponent()</code>方法，我们继续深入探究<code>mountComponent()</code>内部是怎样实现的。</p>
+<p>进入mountComponent，将组件的element元素赋值给$el，触发了beforeMount生命周期，创建了一个<code>Watch</code>实例，最后触发了mounted生命周期，返回vm component对象，核心代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">mountComponent</span> (<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  vm: Component,</span></span></span><br><span class="line"><span class="function"><span class="params">  el: ?Element,</span></span></span><br><span class="line"><span class="function"><span class="params">  hydrating?: boolean</span></span></span><br><span class="line"><span class="function"><span class="params"></span>): <span class="title">Component</span> </span>&#123;</span><br><span class="line">    vm.$el = el</span><br><span class="line">    <span class="keyword">if</span> (!vm.$options.render) &#123;</span><br><span class="line">        vm.$options.render = createEmptyVNode</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">    callHook(vm, <span class="string">'beforeMount'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> updateComponent</span><br><span class="line">    updateComponent = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        vm._update(vm._render(), hydrating)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Watcher(vm, updateComponent, noop, &#123;</span><br><span class="line">        before () &#123;</span><br><span class="line">        <span class="keyword">if</span> (vm._isMounted &amp;&amp; !vm._isDestroyed) &#123;</span><br><span class="line">            callHook(vm, <span class="string">'beforeUpdate'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, <span class="literal">true</span> <span class="comment">/* isRenderWatcher */</span>)</span><br><span class="line">    hydrating = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (vm.$vnode == <span class="literal">null</span>) &#123;</span><br><span class="line">        vm._isMounted = <span class="literal">true</span></span><br><span class="line">        callHook(vm, <span class="string">'mounted'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> vm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="watcher"><a href="#watcher" class="headerlink" title="watcher"></a>watcher</h3><p>我们把焦点放到<code>new Watcher</code>，这段代码发生了什么？转到<code>Watcher</code>类的定义，首先在constructor将<code>watcher</code>的实例的<code>this</code>，push到<code>vm._watchers</code>数组里面，然后对一序列的参数进行赋值初始化，最后调用了里面的<code>this.get()</code>方法，代码如下：</p>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">Watcher</span> </span>&#123;</span><br><span class="line">  vm: Component;</span><br><span class="line">  cb: <span class="built_in">Function</span>;</span><br><span class="line">  id: number;</span><br><span class="line">  deep: boolean;</span><br><span class="line">  user: boolean;</span><br><span class="line">  lazy: boolean;</span><br><span class="line">  sync: boolean;</span><br><span class="line">  dirty: boolean;</span><br><span class="line">  active: boolean;</span><br><span class="line">  deps: <span class="built_in">Array</span>&lt;Dep&gt;;</span><br><span class="line">  newDeps: <span class="built_in">Array</span>&lt;Dep&gt;;</span><br><span class="line">  depIds: SimpleSet;</span><br><span class="line">  newDepIds: SimpleSet;</span><br><span class="line">  before: ?<span class="built_in">Function</span>;</span><br><span class="line">  getter: <span class="built_in">Function</span>;</span><br><span class="line">  value: any;</span><br><span class="line">  <span class="keyword">constructor</span> (</span><br><span class="line">    vm: Component,</span><br><span class="line">    expOrFn: string | Function,</span><br><span class="line">    cb: Function,</span><br><span class="line">    options?: ?Object,</span><br><span class="line">    isRenderWatcher?: boolean</span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="keyword">this</span>.vm = vm</span><br><span class="line">    vm._watchers.push(<span class="keyword">this</span>)</span><br><span class="line">    <span class="comment">// options</span></span><br><span class="line">    <span class="keyword">if</span> (options) &#123;</span><br><span class="line">      <span class="keyword">this</span>.deep = !!options.deep</span><br><span class="line">      <span class="keyword">this</span>.user = !!options.user</span><br><span class="line">      <span class="keyword">this</span>.lazy = !!options.lazy</span><br><span class="line">      <span class="keyword">this</span>.sync = !!options.sync</span><br><span class="line">      <span class="keyword">this</span>.before = options.before</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.deep = <span class="keyword">this</span>.user = <span class="keyword">this</span>.lazy = <span class="keyword">this</span>.sync = <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.cb = cb</span><br><span class="line">    <span class="keyword">this</span>.id = ++uid <span class="comment">// uid for batching</span></span><br><span class="line">    <span class="keyword">this</span>.active = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">this</span>.dirty = <span class="keyword">this</span>.lazy <span class="comment">// for lazy watchers</span></span><br><span class="line">    <span class="keyword">this</span>.deps = []</span><br><span class="line">    <span class="keyword">this</span>.newDeps = []</span><br><span class="line">    <span class="keyword">this</span>.depIds = <span class="keyword">new</span> <span class="built_in">Set</span>()</span><br><span class="line">    <span class="keyword">this</span>.newDepIds = <span class="keyword">new</span> <span class="built_in">Set</span>()</span><br><span class="line">      ? expOrFn.toString()</span><br><span class="line">      : <span class="string">''</span></span><br><span class="line">    <span class="comment">// parse expression for getter</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> expOrFn === <span class="string">'function'</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>.getter = expOrFn</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.getter = parsePath(expOrFn)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.value = <span class="keyword">this</span>.lazy</span><br><span class="line">      ? <span class="literal">undefined</span></span><br><span class="line">      : <span class="keyword">this</span>.get()</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="依赖收集"><a href="#依赖收集" class="headerlink" title="依赖收集"></a>依赖收集</h3><p>在get()处理如下逻辑，先喵一下主流程代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">get</span> () &#123;</span><br><span class="line">    pushTarget(<span class="keyword">this</span>)</span><br><span class="line">    <span class="keyword">let</span> value</span><br><span class="line">    <span class="keyword">const</span> vm = <span class="keyword">this</span>.vm</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      value = <span class="keyword">this</span>.getter.call(vm, vm)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.user) &#123;</span><br><span class="line">        handleError(e, vm, <span class="string">`getter for watcher "<span class="subst">$&#123;<span class="keyword">this</span>.expression&#125;</span>"`</span>)</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> e</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">      <span class="comment">// "touch" every property so they are all tracked as</span></span><br><span class="line">      <span class="comment">// dependencies for deep watching</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.deep) &#123;</span><br><span class="line">        traverse(value)</span><br><span class="line">      &#125;</span><br><span class="line">      popTarget()</span><br><span class="line">      <span class="keyword">this</span>.cleanupDeps()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> value</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// The current target watcher being evaluated.</span></span><br><span class="line"><span class="comment">// This is globally unique because only one watcher</span></span><br><span class="line"><span class="comment">// can be evaluated at a time.</span></span><br><span class="line">Dep.target = <span class="literal">null</span></span><br><span class="line"><span class="keyword">const</span> targetStack = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">pushTarget</span> (<span class="params">target: ?Watcher</span>) </span>&#123;</span><br><span class="line">  targetStack.push(target)</span><br><span class="line">  Dep.target = target</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">popTarget</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  targetStack.pop()</span><br><span class="line">  Dep.target = targetStack[targetStack.length - <span class="number">1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="pushTarget-this"><a href="#pushTarget-this" class="headerlink" title="pushTarget(this)"></a>pushTarget(this)</h4><p>将当前watcher放到targetStack队列, 同一时间只有一个watcher处于收集状态</p>
+<h4 id="this-getter-call-vm-vm）"><a href="#this-getter-call-vm-vm）" class="headerlink" title="this.getter.call(vm, vm）"></a>this.getter.call(vm, vm）</h4><p>回顾<code>mountComponent()</code>方法的传参，其实<code>watcher</code>的<code>getter</code>方法就是调用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> updateComponent</span><br><span class="line">updateComponent = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    vm._update(vm._render(), hydrating)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而<code>_update</code>的核心是触发<code>__patch__</code>，根据虚拟vnode，生成真实的Dom元素, 下面是<code>_update</code>的定义:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Vue.prototype._update = <span class="function"><span class="keyword">function</span> (<span class="params">vnode: VNode, hydrating?: boolean</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> vm: Component = <span class="keyword">this</span></span><br><span class="line">    <span class="keyword">const</span> prevEl = vm.$el</span><br><span class="line">    <span class="keyword">const</span> prevVnode = vm._vnode</span><br><span class="line">    <span class="keyword">const</span> restoreActiveInstance = setActiveInstance(vm)</span><br><span class="line">    vm._vnode = vnode</span><br><span class="line">    <span class="comment">// Vue.prototype.__patch__ is injected in entry points</span></span><br><span class="line">    <span class="comment">// based on the rendering backend used.</span></span><br><span class="line">    <span class="keyword">if</span> (!prevVnode) &#123;</span><br><span class="line">      <span class="comment">// initial render</span></span><br><span class="line">      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// updates</span></span><br><span class="line">      vm.$el = vm.__patch__(prevVnode, vnode)</span><br><span class="line">    &#125;</span><br><span class="line">    restoreActiveInstance()</span><br><span class="line">    <span class="comment">// update __vue__ reference</span></span><br><span class="line">    <span class="keyword">if</span> (prevEl) &#123;</span><br><span class="line">      prevEl.__vue__ = <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (vm.$el) &#123;</span><br><span class="line">      vm.$el.__vue__ = vm</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// if parent is an HOC, update its $el as well</span></span><br><span class="line">    <span class="keyword">if</span> (vm.$vnode &amp;&amp; vm.$parent &amp;&amp; vm.$vnode === vm.$parent._vnode) &#123;</span><br><span class="line">      vm.$parent.$el = vm.$el</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// updated hook is called by the scheduler to ensure that children are</span></span><br><span class="line">    <span class="comment">// updated in a parent's updated hook.</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如何进行依赖收集呢"><a href="#如何进行依赖收集呢" class="headerlink" title="如何进行依赖收集呢"></a>如何进行依赖收集呢</h4><p>回到get/seter的处理：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.defineProperty(obj, key, &#123;</span><br><span class="line">    enumerable: <span class="literal">true</span>,</span><br><span class="line">    configurable: <span class="literal">true</span>,</span><br><span class="line">    <span class="keyword">get</span>: function reactiveGetter () &#123;</span><br><span class="line">      <span class="keyword">const</span> value = getter ? getter.call(obj) : val</span><br><span class="line">      <span class="keyword">if</span> (Dep.target) &#123;</span><br><span class="line">        dep.depend()</span><br><span class="line">        <span class="keyword">if</span> (childOb) &#123;</span><br><span class="line">          childOb.dep.depend()</span><br><span class="line">          <span class="keyword">if</span> (<span class="built_in">Array</span>.isArray(value)) &#123;</span><br><span class="line">            dependArray(value)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> value</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">set</span>: function reactiveSetter (newVal) &#123;</span><br><span class="line">      <span class="keyword">const</span> value = getter ? getter.call(obj) : val</span><br><span class="line">      <span class="comment">/* eslint-disable no-self-compare */</span></span><br><span class="line">      <span class="keyword">if</span> (newVal === value || (newVal !== newVal &amp;&amp; value !== value)) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">/* eslint-enable no-self-compare */</span></span><br><span class="line">      <span class="keyword">if</span> (process.env.NODE_ENV !== <span class="string">'production'</span> &amp;&amp; customSetter) &#123;</span><br><span class="line">        customSetter()</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// #7981: for accessor properties without setter</span></span><br><span class="line">      <span class="keyword">if</span> (getter &amp;&amp; !setter) <span class="keyword">return</span></span><br><span class="line">      <span class="keyword">if</span> (setter) &#123;</span><br><span class="line">        setter.call(obj, newVal)</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        val = newVal</span><br><span class="line">      &#125;</span><br><span class="line">      childOb = !shallow &amp;&amp; observe(newVal)</span><br><span class="line">      dep.notify()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>我们发现在get里面，触发了<code>dep.depend()</code>:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">depend () &#123;</span><br><span class="line">  <span class="keyword">if</span> (Dep.target) &#123;</span><br><span class="line">      Dep.target.addDep(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面说到，在实例化watcher的时候，pushTarget(this)，即 target =&gt; watcher, 因此在get的时候，就是触发了watcher里面的<code>addDep</code>, 同一个watcher通过newDepIds维护，根据id避免<br>收集重复的依赖～～</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">addDep (dep: Dep) &#123;</span><br><span class="line">    <span class="keyword">const</span> id = dep.id</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.newDepIds.has(id)) &#123;</span><br><span class="line">      <span class="keyword">this</span>.newDepIds.add(id)</span><br><span class="line">      <span class="keyword">this</span>.newDeps.push(dep)</span><br><span class="line">      <span class="keyword">if</span> (!<span class="keyword">this</span>.depIds.has(id)) &#123;</span><br><span class="line">        dep.addSub(<span class="keyword">this</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在vnode转化成真实Dom元素的时候，会触发数据绑定中的get, 进行依赖收集，收集完成调用popTarget()，this.cleanupDeps(), 避免造成对下一次依赖收集的污染。</p>
+<p>所有依赖塞进一个数组队列<code>subs</code>维护，当数据发生变化，在set方法触发<code>notify()</code>, 遍历subs里面的元素（其实就是watcher对象），调用<code>watcher</code>对象的<code>update()</code>方法, 触<code>run()</code>方法进行派发更新，最终还是回到了<code>vm._update(vm._render(), hydrating)</code>，更新渲染。</p>
+<p>需要注意的是， 内部根据组件id进行排序，保证更新顺序是由父组件到子组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue.sort(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a.id - b.id)</span><br></pre></td></tr></table></figure>
+
+<p>为了提高性能vue实行异步更新watcher队列, 就是将<code>watcher.run()</code>放到任务队列，如：</p>
+<ul>
+<li><code>Promise.resolve(flushCallbacks)</code></li>
+<li><code>setTimeout(flushCallbacks, 0)</code></li>
+<li><code>const observer = new MutationObserver(flushCallbacks)</code></li>
+</ul>
+<p>贴出官方文档的解释：</p>
+<blockquote>
+<p>可能你还没有注意到，Vue 在更新 DOM 时是异步执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserver 和 setImmediate，如果执行环境不支持，则会采用 setTimeout(fn, 0) 代替。<br>例如，当你设置 vm.someData = ‘new value’，该组件不会立即重新渲染。当刷新队列时，组件会在下一个事件循环“tick”中更新。多数情况我们不需要关心这个过程，但是如果你想基于更新后的 DOM 状态来做点什么，这就可能会有些棘手。虽然 Vue.js 通常鼓励开发人员使用“数据驱动”的方式思考，避免直接接触 DOM，但是有时我们必须要这么做。为了在数据变化之后等待 Vue 完成更新 DOM，可以在数据变化之后立即使用 Vue.nextTick(callback)。这样回调函数将在 DOM 更新完成后被调用</p>
+</blockquote>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>对vue 2.x的源码分析至此over, 在debug的过程中，曾经怀疑过是否值得花这么多时间去做这个事情，但最终还是走过来了，深入debug源码我觉得有两点是非常重要的：</p>
+<ul>
+<li>了解框架内部实现</li>
+<li>学习编程设计模式</li>
+</ul>
+<p>我对自己对要求是，是否吃透了JavaScript，是否达到为所欲为的程度？很显然，离这个水平还有很长的路要走，那就继续努力吧。接下来转战vue 3.0了，我可能会再去撸一遍vue 3.0的源码，大概就是想学好<code>typescript</code>😬</p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">yiyu-liao</span></span>
+                <time datetime="2020-01-10T16:00:00.000Z" data-updated="true">Sat Jan 11 2020</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/vue/">vue</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           href="https://twitter.com/intent/tweet?text=Vue%202.x%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/2020/01/16/2020-01-16-vue-next%20copy/index.html" title="Previous Post: Vue 3.0源码初窥">« Vue 3.0源码初窥</a>
+                
+
+                
+                <a class="basic-alignment right" href="/2019/12/01/2019-12-01-summary/index.html" title="Previous Post: 最近的一些感悟">最近的一些感悟 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11-about-frontend/">当team只有一个前端人力</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20-xmind/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23-tree/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13-awesome-coding/">Awesome Coding for js</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/work-summary/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20-error-handle/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12-graphql/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01-flag/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27-auto-deploy/">利用git hooks快速部署node服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/17/2020-03-17-summary/">迟来的总结</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a href="https://github.com/yiyu-liao" target="_blank" rel="noopener">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - yiyu-liao -
+        <span class="credit">Generated using <a href="https://github.com/jbreckmckye/hexo-theme-octo" target="_blank" rel="noopener">Octo theme</a> for <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

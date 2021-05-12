@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>二叉树非递归遍历学习笔记</title>
+
+    <meta name="author" content="yiyu-liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://yoursite.com/2020/07/23/2020-07-23-tree/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://yoursite.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">二叉树非递归遍历学习笔记</h1>
+            <p class="meta">
+                <time datetime="2020-07-22T16:00:00.000Z" data-updated="true">Thu Jul 23 2020</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>最近在复习二叉树的一些概念，二叉树的遍历可以通过递归实现，递归的问题在于如果数据量过大，会造成函数的执行栈溢出，chrome v8引擎下执行栈大概超出10000次就会提示报错。下面是利用栈先进先出的概念，模拟递归的思想，简单记录，温故而知新。</p>
+<h3 id="创建节点Class"><a href="#创建节点Class" class="headerlink" title="创建节点Class"></a>创建节点Class</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(value) &#123;</span><br><span class="line">        <span class="keyword">this</span>.value = value;</span><br><span class="line">        <span class="keyword">this</span>.left = <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">this</span>.right = <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成二叉树逻辑"><a href="#生成二叉树逻辑" class="headerlink" title="生成二叉树逻辑"></a>生成二叉树逻辑</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">defaultCompare</span>(<span class="params">next, pre</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> next - pre;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">binarySearchTree</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(compareFn = defaultCompare) &#123;</span><br><span class="line">        <span class="keyword">this</span>.compareFn = compareFn;</span><br><span class="line">        <span class="keyword">this</span>.root = <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    insert(value) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.root === <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.root = <span class="keyword">new</span> Node(value)</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.insertNode(value, <span class="keyword">this</span>.root)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    insertNode(value, node) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.compareFn(value, node.value) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (node.left === <span class="literal">null</span>) &#123;</span><br><span class="line">                node.left = <span class="keyword">new</span> Node(value)</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.insertNode(value, node.left)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (node.right === <span class="literal">null</span>) &#123;</span><br><span class="line">                node.right = <span class="keyword">new</span> Node(value)</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.insertNode(value, node.right)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建二叉树实例"><a href="#创建二叉树实例" class="headerlink" title="创建二叉树实例"></a>创建二叉树实例</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">const</span> tree = <span class="keyword">new</span> binarySearchTree();</span><br><span class="line"></span><br><span class="line">tree.insert(<span class="number">1</span>);</span><br><span class="line">tree.insert(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="先序遍历"><a href="#先序遍历" class="headerlink" title="先序遍历"></a>先序遍历</h3><blockquote>
+<p>根-左-右：先访问根节点，再对根节点的左子树进行先序遍历，最后对根节点的右子树进行先序遍历（应用：打印结构文档）</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[root=this.root]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[callback=(n) =&gt; console.log(n)]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@memberof <span class="variable">binarySearchTree</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">preOrderTraverse(root = <span class="keyword">this</span>.root, callback = <span class="function">(<span class="params">n</span>) =&gt;</span> <span class="built_in">console</span>.log(n)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> stack = [root];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (stack.length) &#123;</span><br><span class="line">        <span class="keyword">const</span> cur = stack.pop();</span><br><span class="line">        callback(cur.value);</span><br><span class="line">        <span class="keyword">if</span> (cur.right) stack.push(cur.right);</span><br><span class="line">        <span class="keyword">if</span> (cur.left) stack.push(cur.left);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="中序遍历"><a href="#中序遍历" class="headerlink" title="中序遍历"></a>中序遍历</h3><blockquote>
+<p>左-根-右：先对根节点的左子树进行中序遍历，再访问根节点，最后对根节点的右子树中序遍历（应用：排序，从小到大）</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[root=this.root]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[callback=(n) =&gt; console.log(n)]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@memberof <span class="variable">binarySearchTree</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">inOrderTraverse(root = <span class="keyword">this</span>.root, callback = <span class="function">(<span class="params">n</span>) =&gt;</span> <span class="built_in">console</span>.log(n)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> stack = [];</span><br><span class="line">    <span class="keyword">let</span> p = root;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(stack.length || p) &#123;</span><br><span class="line">        <span class="keyword">while</span>(p) &#123;</span><br><span class="line">            stack.push(p)</span><br><span class="line">            p = p.left</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> cur = stack.pop();</span><br><span class="line">        callback(cur.value);</span><br><span class="line">        p = cur.right;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="后序遍历"><a href="#后序遍历" class="headerlink" title="后序遍历"></a>后序遍历</h3><blockquote>
+<p>左-右-根：先对根节点的左子树进行后序遍历，再对根节点的右子树进行后序遍历，最后访问根节点（应用：计算一个目录及其子目录中所有文件所占空间的大小）</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[root=this.root]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>[callback=(n) =&gt; console.log(n)]</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@memberof <span class="variable">binarySearchTree</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">postOrderTraverse(root = <span class="keyword">this</span>.root, callback = <span class="function">(<span class="params">n</span>) =&gt;</span> <span class="built_in">console</span>.log(n)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> stack = [root];</span><br><span class="line">    <span class="keyword">const</span> list = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(stack.length) &#123;</span><br><span class="line">        <span class="keyword">const</span> node = stack.pop();</span><br><span class="line">        list.unshift(node.value);</span><br><span class="line">        node.left &amp;&amp; stack.push(node.left);</span><br><span class="line">        node.right &amp;&amp; stack.push(node.right);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(list.length) &#123;</span><br><span class="line">        <span class="keyword">const</span> target = list.pop();</span><br><span class="line">        callbacl(target.value)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">yiyu-liao</span></span>
+                <time datetime="2020-07-22T16:00:00.000Z" data-updated="true">Thu Jul 23 2020</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/algorithm/">algorithm</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           href="https://twitter.com/intent/tweet?text=%E4%BA%8C%E5%8F%89%E6%A0%91%E9%9D%9E%E9%80%92%E5%BD%92%E9%81%8D%E5%8E%86%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/2020/09/20/2020-09-20-xmind/index.html" title="Previous Post: 通过snabbdom原生实现简易的记账本">« 通过snabbdom原生实现简易的记账本</a>
+                
+
+                
+                <a class="basic-alignment right" href="/2020/07/23/2020-8-13-awesome-coding/index.html" title="Previous Post: Awesome Coding for js">Awesome Coding for js »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11-about-frontend/">当team只有一个前端人力</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20-xmind/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23-tree/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13-awesome-coding/">Awesome Coding for js</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/work-summary/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20-error-handle/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12-graphql/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01-flag/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27-auto-deploy/">利用git hooks快速部署node服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/17/2020-03-17-summary/">迟来的总结</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a href="https://github.com/yiyu-liao" target="_blank" rel="noopener">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - yiyu-liao -
+        <span class="credit">Generated using <a href="https://github.com/jbreckmckye/hexo-theme-octo" target="_blank" rel="noopener">Octo theme</a> for <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>
