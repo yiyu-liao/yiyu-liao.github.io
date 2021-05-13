@@ -2,7 +2,6 @@
 layout: post
 title:  "Lifebyte工作总结"
 date:   2020-06-06
-catalog: true
 tags: Summary
 ---
 
