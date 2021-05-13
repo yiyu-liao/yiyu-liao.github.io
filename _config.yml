@@ -100,5 +100,5 @@ theme: octo
 deploy:
   type: git
   repo: git@github.com:yiyu-liao/yiyu-liao.github.io.git
-  branch: master
+  branch: develop
 
