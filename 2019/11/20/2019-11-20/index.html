@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>webpack编译主流程初窥</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2019/11/20/2019-11-20/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas Liao&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">webpack编译主流程初窥</h1>
+            <p class="meta">
+                <time datetime="2019-11-19T16:00:00.000Z" data-updated="true">Wed Nov 20 2019</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <blockquote>
+<p>本文基于webpack5.0.0-beta.7, 参考一些优秀的文章，通过debug源码的方式，了解webpack的编译主流程，仅供参考。</p>
+</blockquote>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git@github.com:webpack/webpack.git</span><br></pre></td></tr></table></figure>
+
+<p>为了不污染源码，在根目录新建debug文件夹📃，并创建如下文件: </p>
+<ul>
+<li>编译代码：</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// debug/src/index.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> name = <span class="string">&quot;webpack&quot;</span>;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;很高兴认识你,&quot;</span>, name);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>webpack配置：</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// debug/webpack.config.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">	<span class="attr">context</span>: __dirname,</span><br><span class="line">	<span class="attr">mode</span>: <span class="string">&quot;development&quot;</span>,</span><br><span class="line">	<span class="attr">devtool</span>: <span class="string">&quot;source-map&quot;</span>,</span><br><span class="line">	<span class="attr">entry</span>: <span class="string">&quot;./src/index.js&quot;</span>,</span><br><span class="line">	<span class="attr">output</span>: &#123;</span><br><span class="line">		<span class="attr">path</span>: path.<span class="title function_">join</span>(__dirname, <span class="string">&quot;./dist&quot;</span>)</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="attr">module</span>: &#123;</span><br><span class="line">		<span class="attr">rules</span>: [</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="attr">test</span>: <span class="regexp">/\.js$/</span>,</span><br><span class="line">				<span class="attr">use</span>: [<span class="string">&quot;babel-loader&quot;</span>],</span><br><span class="line">				<span class="attr">exclude</span>: <span class="regexp">/node_modules/</span></span><br><span class="line">			&#125;</span><br><span class="line">		]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>启动文件：</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// debug/start.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">&quot;../lib/index.js&quot;</span>); <span class="comment">// 直接使用源码中的webpack函数</span></span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&quot;./webpack.config&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> compiler = <span class="title function_">webpack</span>(config);</span><br><span class="line">compiler.<span class="title function_">run</span>(<span class="function">(<span class="params">err, stats</span>) =&gt;</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (err) &#123;</span><br><span class="line">		<span class="variable language_">console</span>.<span class="title function_">error</span>(err);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="variable language_">console</span>.<span class="title function_">log</span>(stats);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在vscode配置debug入口，如下：</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;configurations&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="string">&quot;node&quot;</span>,</span><br><span class="line">      <span class="string">&quot;request&quot;</span>: <span class="string">&quot;launch&quot;</span>,</span><br><span class="line">      <span class="string">&quot;name&quot;</span>: <span class="string">&quot;启动webpack调试程序&quot;</span>,</span><br><span class="line">      <span class="string">&quot;program&quot;</span>: <span class="string">&quot;$&#123;workspaceFolder&#125;/debug/start.js&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，点击▶️，看看调试程序是否正常运行（若正常运行，会在debug&#x2F;dist自动生成打包后的js文件）</p>
+<p>接下来，就可以在源码进行断点调试啦～～ 🤔</p>
+<hr>
+<h2 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h2><h3 id="compiler-run"><a href="#compiler-run" class="headerlink" title="compiler.run()"></a>compiler.run()</h3><p>cd webpack, 打开package.json, 找到main字段，可以看到webpack的主入口在lib&#x2F;index.js</p>
+<p>当调用了<code>const compiler = webpack(config)</code>，其实就是创建一个Compiler实例，在这里我们发现，Compiler在webpack运行过程中，仅此创建一次，贯穿整个打包过程，下面为主要逻辑代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">createCompiler</span> = options =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">const</span> compiler = <span class="keyword">new</span> <span class="title class_">Compiler</span>(options.<span class="property">context</span>);</span><br><span class="line">	compiler.<span class="property">options</span> = options;</span><br><span class="line">	<span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(options.<span class="property">plugins</span>)) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">const</span> plugin <span class="keyword">of</span> options.<span class="property">plugins</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (<span class="keyword">typeof</span> plugin === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">				plugin.<span class="title function_">call</span>(compiler, compiler);</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				plugin.<span class="title function_">apply</span>(compiler);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">    compiler.<span class="property">hooks</span>.<span class="property">environment</span>.<span class="title function_">call</span>();</span><br><span class="line">	compiler.<span class="property">hooks</span>.<span class="property">afterEnvironment</span>.<span class="title function_">call</span>();</span><br><span class="line">	compiler.<span class="property">options</span> = <span class="keyword">new</span> <span class="title class_">WebpackOptionsApply</span>().<span class="title function_">process</span>(options, compiler);    </span><br><span class="line">	<span class="keyword">return</span> compiler;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>当准备工作做好，内部钩子相关联的事件处于蓄势待发状态，接下来把我们进入Compiler, 看里面的run方法是什么回事🤔？</p>
+<p>最终定位到<code>this.compile()</code>, 通过<code>callAsync</code>触发钩子，逻辑代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">this</span>.<span class="property">hooks</span>.<span class="property">make</span>.<span class="title function_">callAsync</span>(compilation, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">	compilation.<span class="title function_">finish</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">		compilation.<span class="title function_">seal</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">			<span class="variable language_">this</span>.<span class="property">hooks</span>.<span class="property">afterCompile</span>.<span class="title function_">callAsync</span>(compilation, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="title function_">callback</span>(<span class="literal">null</span>, compilation);</span><br><span class="line">			&#125;);</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里需要提下<a target="_blank" rel="noopener" href="https://github.com/webpack/tapable">Tapable</a>，Tapable的核心功能是根据不同钩子将注册的事件在触发时按序进行，是典型的发布者&#x2F;订阅模式，在Tapable的帮助下，原本杂乱无章的事件，能够得到有效的控制。</p>
+<p>简单实现一个SyncHook</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Hooks</span> &#123;</span><br><span class="line">	<span class="title function_">constructor</span>(<span class="params">args</span>) &#123;</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">taps</span> = [];</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">interceptors</span> = [];</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">_args</span> = args;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="title function_">tab</span>(<span class="params">name, fn</span>) &#123;</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">taps</span>.<span class="title function_">push</span>(&#123; name, fn &#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SyncHooks</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Hooks</span> &#123;</span><br><span class="line">	<span class="title function_">call</span>(<span class="params">name, fn</span>) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="variable language_">this</span>.<span class="property">taps</span>.<span class="title function_">forEach</span>(<span class="function"><span class="params">tap</span> =&gt;</span> tap.<span class="title function_">fn</span>(name));</span><br><span class="line">			<span class="title function_">fn</span>(<span class="literal">null</span>, name);</span><br><span class="line">		&#125;<span class="keyword">catch</span>(error) &#123;</span><br><span class="line">			<span class="title function_">fn</span>(error)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="process-options-compiler"><a href="#process-options-compiler" class="headerlink" title="process(options, compiler)"></a>process(options, compiler)</h3><p>当调用<code>this.hooks.make.callAsync</code>其实触发了什么？为了找到答案，我们在vscode全局搜索<code>hooks.make.tapAsync</code>, 发现<code>lib/EntryPlugin.js</code>下有如下逻辑：</p>
+<blockquote>
+<p>成熟的开源库，往往作者大佬进行了非常优雅的封装，代码的模块依赖也非常错中复杂，依靠搜索关键词可以快速找到答案。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">compiler.<span class="property">hooks</span>.<span class="property">make</span>.<span class="title function_">tapAsync</span>(<span class="string">&quot;EntryPlugin&quot;</span>, <span class="function">(<span class="params">compilation, callback</span>) =&gt;</span> &#123;</span><br><span class="line">	<span class="keyword">const</span> &#123; entry, name, context &#125; = <span class="variable language_">this</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">const</span> dep = <span class="title class_">EntryPlugin</span>.<span class="title function_">createDependency</span>(entry, name);</span><br><span class="line">	compilation.<span class="title function_">addEntry</span>(context, dep, name, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">		<span class="title function_">callback</span>(err);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>先不管这里的逻辑是怎样的，思考下<code>EntryPlugin</code>是什么时候调用的？我们继续通过关键词<code>new EntryPlugin</code>,<br>在<code>lib/EntryOptionPlugin.js</code>找到<code>EntryPlugin</code>在此进行了实例化，继续回溯搜索<code>new EntryOptionPlugin</code>, 最终发现在<code>lib/WebpackOptionsApply.js</code>发现它的身影。</p>
+<p>回到最初createCompiler方法，如下，<code>compiler.options = new WebpackOptionsApply().process(options, compiler)</code>这行代码，make钩子在process函数中就已经注册好了, 把一切准备工作都关联了起来。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">createCompiler</span> = options =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">const</span> compiler = <span class="keyword">new</span> <span class="title class_">Compiler</span>(options.<span class="property">context</span>);</span><br><span class="line">	compiler.<span class="property">options</span> = options;</span><br><span class="line">	<span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(options.<span class="property">plugins</span>)) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">const</span> plugin <span class="keyword">of</span> options.<span class="property">plugins</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (<span class="keyword">typeof</span> plugin === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">				plugin.<span class="title function_">call</span>(compiler, compiler);</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				plugin.<span class="title function_">apply</span>(compiler);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">    compiler.<span class="property">hooks</span>.<span class="property">environment</span>.<span class="title function_">call</span>();</span><br><span class="line">	compiler.<span class="property">hooks</span>.<span class="property">afterEnvironment</span>.<span class="title function_">call</span>();</span><br><span class="line">	compiler.<span class="property">options</span> = <span class="keyword">new</span> <span class="title class_">WebpackOptionsApply</span>().<span class="title function_">process</span>(options, compiler);    </span><br><span class="line">	<span class="keyword">return</span> compiler;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>回到lib&#x2F;EntryPlugin.js看看<code>compiler.hooks.make.tapAsync</code>都干了啥。其实就是运行compiliation.addEntry方法，继续探索compiliation.addEntry。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">addEntry</span>(<span class="params">context, entry, name, callback</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">hooks</span>.<span class="property">addEntry</span>.<span class="title function_">call</span>(entry, name);</span><br><span class="line">    <span class="comment">// entryDependencies中的每一项都代表了一个入口，打包输出就会有多个文件</span></span><br><span class="line">    <span class="keyword">let</span> entriesArray = <span class="variable language_">this</span>.<span class="property">entryDependencies</span>.<span class="title function_">get</span>(name)</span><br><span class="line">	entriesArray.<span class="title function_">push</span>(entry)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">addModuleChain</span>(context, entry, <span class="function">(<span class="params">err, <span class="variable language_">module</span></span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">hooks</span>.<span class="property">succeedEntry</span>.<span class="title function_">call</span>(entry, name, <span class="variable language_">module</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">callback</span>(<span class="literal">null</span>, <span class="variable language_">module</span>);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过debug找出函数的调用顺序</p>
+<p>this.addEntry –&gt; this.addModuleChain –&gt; this.handleModuleCreation –&gt; this.addModule –&gt; this.buildModule –&gt; this._buildModule –&gt; module.build(this指代compiliation)</p>
+<p>在&#x2F;lib&#x2F;NormalModule.js下找到build方法，返回doBuild方法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">build</span>(<span class="params">options, compilation, resolver, fs, callback</span>) &#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">doBuild</span>(options, compilation, resolver, fs, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="keyword">const</span> result = <span class="variable language_">this</span>.<span class="property">parser</span>.<span class="title function_">parse</span>(</span><br><span class="line">					<span class="variable language_">this</span>.<span class="property">_ast</span> || <span class="variable language_">this</span>.<span class="property">_source</span>.<span class="title function_">source</span>(),</span><br><span class="line">					&#123;</span><br><span class="line">						<span class="attr">current</span>: <span class="variable language_">this</span>,</span><br><span class="line">						<span class="attr">module</span>: <span class="variable language_">this</span>,</span><br><span class="line">						<span class="attr">compilation</span>: compilation,</span><br><span class="line">						<span class="attr">options</span>: options</span><br><span class="line">					&#125;,</span><br><span class="line">					<span class="function">(<span class="params">err, result</span>) =&gt;</span> &#123;</span><br><span class="line">						<span class="keyword">if</span> (err) &#123;</span><br><span class="line"></span><br><span class="line">						&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">							<span class="title function_">handleParseResult</span>(result);</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">				);</span><br><span class="line">				<span class="keyword">if</span> (result !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">					<span class="comment">// parse is sync</span></span><br><span class="line">					<span class="title function_">handleParseResult</span>(result);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">				</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>doBuild方法其实就是用适合的loader去加载模块资源，webpack只能识别js文件，通过doBuild后，<br>所有文件都转换了js文件。</p>
+<p>接着通过传入的callback，执行this.parser.parse，this.parser是JavascriptParser的实例，<br>最终调用parse调用第三方库acorn对js源代码进行词法解析, 这个过程就是收集模块之间的依赖。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">parse</span>(<span class="params">code, options</span>)&#123;</span><br><span class="line">    <span class="comment">// 调用第三方插件`acorn`解析JS模块</span></span><br><span class="line">    <span class="keyword">let</span> ast = acorn.<span class="title function_">parse</span>(code)</span><br><span class="line">    <span class="comment">// 省略部分代码</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">hooks</span>.<span class="property">program</span>.<span class="title function_">call</span>(ast, comments) === <span class="literal">undefined</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">detectStrictMode</span>(ast.<span class="property">body</span>)</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">prewalkStatements</span>(ast.<span class="property">body</span>)</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">blockPrewalkStatements</span>(ast.<span class="property">body</span>)</span><br><span class="line">        <span class="comment">// 这里webpack会遍历一次ast.body，其中会收集这个模块的所有依赖项，最后写入到`module.dependencies`中</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">walkStatements</span>(ast.<span class="property">body</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="compilation-seal"><a href="#compilation-seal" class="headerlink" title="compilation.seal()"></a>compilation.seal()</h3><p>至此从入口文件，webpack已经收集了所有的模块依赖，就等着打包输入啦～～（真累🥺）</p>
+<p>compilation.seal最终将资源保存在compilation.assets, compilation.chunks中，所以在编写<br>webpack插件时候，经常会看到这两个的字段的身影。</p>
+<h3 id="compiler-hooks-emit-callAsync"><a href="#compiler-hooks-emit-callAsync" class="headerlink" title="compiler.hooks.emit.callAsync()"></a>compiler.hooks.emit.callAsync()</h3><p>执行seal后，所以资源都保存到内存中了，最后调用emit钩子根据webpack.config的配置将文件输出到指定路径。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写得比较模糊仓促，其实对于webpack loader&#x2F;tapable这一块还可以继续深入探究，可能只有自己才能看得懂哈哈哈，anyway～～ 有空再回头补充下，感谢开源～～</p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2019-11-19T16:00:00.000Z" data-updated="true">Wed Nov 20 2019</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/webpack/">webpack</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=webpack%E7%BC%96%E8%AF%91%E4%B8%BB%E6%B5%81%E7%A8%8B%E5%88%9D%E7%AA%A5">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/" title="Previous Post: leetcode刷题记录">« leetcode刷题记录</a>
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: 函数Apply/Call/Bind的一些用法">函数Apply/Call/Bind的一些用法 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/07/25/2023-07-25/">越过了5年经验的门槛</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11/">当团队中只有一个前端</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13/">一些有趣的js编程技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/2020-06-06/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27/">利用git hooks快速部署node服务</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2023 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

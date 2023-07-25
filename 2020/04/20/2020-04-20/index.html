@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>typescript error handle</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2020/04/20/2020-04-20/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas Liao&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">typescript error handle</h1>
+            <p class="meta">
+                <time datetime="2020-04-19T16:00:00.000Z" data-updated="true">Mon Apr 20 2020</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>记录最近<a target="_blank" rel="noopener" href="https://medium.com/">medium</a>中看到一篇技术文，typescript中如何进行错误异常处理。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> <span class="title class_">Either</span>&lt;L, A&gt; = <span class="title class_">Left</span>&lt;L, A&gt; | <span class="title class_">Right</span>&lt;L, A&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Left</span>&lt;L, A&gt; &#123;</span><br><span class="line">    <span class="keyword">readonly</span> <span class="attr">value</span>: L;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">value: L</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">value</span> = value;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">isLeft</span>(): <span class="variable language_">this</span> is <span class="title class_">Left</span>&lt;L, A&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">        </span><br><span class="line">    <span class="title function_">isRight</span>(): <span class="variable language_">this</span> is <span class="title class_">Right</span>&lt;L, A&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Right</span>&lt;L, A&gt; &#123;</span><br><span class="line">    <span class="keyword">readonly</span> <span class="attr">value</span>: A;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">value: A</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">value</span> = A;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">isLeft</span>(): <span class="variable language_">this</span> is <span class="title class_">Left</span>&lt;L, A&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">isRight</span>(): <span class="variable language_">this</span> is <span class="title class_">Right</span>&lt;L, A&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> left = &lt;L, A&gt;(<span class="attr">l</span>: A): <span class="title class_">Either</span>&lt;L, A&gt; =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Left</span>&lt;L, A&gt;(l)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> right = &lt;L, A&gt;(<span class="attr">a</span>: A): <span class="title class_">Eiter</span>&lt;L, A&gt; =&gt; &#123;</span><br><span class="line">    retunr <span class="keyword">new</span> <span class="title class_">Right</span>(L, A)(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>base use:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">negativeCountError</span> = (<span class="params"></span>) =&gt; (&#123;</span><br><span class="line">    <span class="attr">message</span>: <span class="string">&#x27;All patient counts should be strictly positive&#x27;</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sumCounts = (...<span class="attr">counts</span>: <span class="title class_">Array</span>&lt;<span class="built_in">number</span>&gt;): <span class="title class_">Either</span>&lt;&#123; <span class="attr">message</span>: <span class="built_in">string</span> &#125;, <span class="built_in">number</span>&gt; =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (counts.<span class="title function_">some</span>(<span class="function"><span class="params">count</span> =&gt;</span> count &lt; <span class="number">0</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">left</span>(<span class="title function_">negativeCountError</span>())</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">right</span>(<span class="title class_">Math</span>.<span class="title function_">sum</span>(...counts))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> globalResult = <span class="title function_">sumCounts</span>(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (globalResult.<span class="title function_">isLeft</span>()) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; message &#125; = globalResult.<span class="property">value</span></span><br><span class="line">    <span class="comment">// to do something with error</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> &#123; value &#125; = globalResult;</span><br><span class="line"><span class="comment">// to do something with right result</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>improve:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Left</span>&lt;L, A&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    applyOnRight&lt;B&gt;(<span class="attr">_</span>: <span class="function">(<span class="params">a: A</span>) =&gt;</span> B): <span class="title class_">Either</span>&lt;L, B&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">this</span> <span class="keyword">as</span> <span class="built_in">any</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Right</span>&lt;L, A&gt; &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    applyOnRight&lt;B&gt;(<span class="attr">func</span>: <span class="function">(<span class="params">a: A</span>) =&gt;</span> B): <span class="title class_">Either</span>&lt;L, B&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Right</span>&lt;<span class="title function_">func</span>(<span class="variable language_">this</span>.<span class="property">value</span>)&gt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>improve use:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> globalResult = <span class="title function_">sumCounts</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line"><span class="keyword">return</span> globalResult.<span class="title function_">applyOnRight</span>(getResultDoSomethingFun</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Domain-Driven-Design"><a href="#Domain-Driven-Design" class="headerlink" title="Domain-Driven-Design"></a>Domain-Driven-Design</h3><figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">Failure</span>&lt;<span class="title class_">FailureType</span> <span class="keyword">extends</span> <span class="built_in">string</span>&gt; &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="title class_">FailureType</span>;</span><br><span class="line">    <span class="attr">reson</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">enum</span> <span class="title class_">UserError</span> &#123;</span><br><span class="line">    <span class="title class_">InvalidCreationArguments</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> invalidCreationArguments = (): <span class="title class_">Failure</span>&lt;<span class="title class_">UserError</span>.<span class="property">InvalidCreationArguments</span>&gt; =&gt; (&#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="title class_">UserError</span>.<span class="property">InvalidCreationArguments</span>,</span><br><span class="line">    <span class="attr">reason</span>: <span class="string">&#x27;Email, Firstname and Lastname cannot be empty&#x27;</span>,</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">UserConstructorArgs</span> &#123;</span><br><span class="line">    <span class="attr">email</span>: <span class="built_in">string</span>;</span><br><span class="line">    <span class="attr">firstname</span>: <span class="built_in">string</span>;</span><br><span class="line">    <span class="attr">lastname</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">readonly</span> <span class="attr">email</span>: <span class="built_in">string</span>;</span><br><span class="line">    <span class="keyword">readonly</span> <span class="attr">firstname</span>: <span class="built_in">string</span>;</span><br><span class="line">    <span class="keyword">readonly</span> <span class="attr">lastname</span>: <span class="built_in">string</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">constructor</span>(<span class="params">props: UserConstructorArgs</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">email</span> = props.<span class="property">email</span>;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">firstname</span> = props.<span class="property">firstname</span>;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">lastname</span> = props.<span class="property">lastname</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="title function_">build</span>(&#123;</span><br><span class="line">        email,</span><br><span class="line">        firstname,</span><br><span class="line">        lastname</span><br><span class="line">    &#125;): <span class="title class_">Either</span>&lt;<span class="title class_">Failure</span>&lt;<span class="title class_">User</span>.<span class="property">invalidCreationArguments</span>&gt;, <span class="title class_">User</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> ([email, firstname, lastname].<span class="title function_">some</span>(<span class="function"><span class="params">field</span> =&gt;</span> field.<span class="property">length</span> === <span class="number">0</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">left</span>(invalidCreationArguments)</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">right</span>(<span class="keyword">new</span> <span class="title class_">User</span>(&#123; email, firstname, lastname &#125;))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2020-04-19T16:00:00.000Z" data-updated="true">Mon Apr 20 2020</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/typescript/">typescript</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=typescript%20error%20handle">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/" title="Previous Post: Lifebyte工作总结">« Lifebyte工作总结</a>
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: graphql">graphql »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/07/25/2023-07-25/">越过了5年经验的门槛</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11/">当团队中只有一个前端</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13/">一些有趣的js编程技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/2020-06-06/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27/">利用git hooks快速部署node服务</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2023 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

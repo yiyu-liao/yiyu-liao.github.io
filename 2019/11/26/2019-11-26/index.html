@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>leetcode刷题记录</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2019/11/26/2019-11-26/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas Liao&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">leetcode刷题记录</h1>
+            <p class="meta">
+                <time datetime="2019-11-25T16:00:00.000Z" data-updated="true">Tue Nov 26 2019</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h2 id="动态规划"><a href="#动态规划" class="headerlink" title="动态规划"></a>动态规划</h2><h3 id="爬楼梯"><a href="#爬楼梯" class="headerlink" title="爬楼梯"></a>爬楼梯</h3><p>假设你正在爬楼梯。需要 n 阶你才能到达楼顶。</p>
+<p>每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？</p>
+<p>注意：给定 n 是一个正整数。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/climbing-stairs/">https://leetcode-cn.com/problems/climbing-stairs/</a><br>思路：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/climbing-stairs/solution/hua-jie-suan-fa-70-pa-lou-ti-by-guanpengchn/">https://leetcode-cn.com/problems/climbing-stairs/solution/hua-jie-suan-fa-70-pa-lou-ti-by-guanpengchn/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> climbStairs = <span class="keyword">function</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> dp = [];</span><br><span class="line">    dp[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">    dp[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">2</span>; i &lt;= n; i ++) &#123;</span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>] + dp[i - <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[n]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="买卖股票的最佳时机"><a href="#买卖股票的最佳时机" class="headerlink" title="买卖股票的最佳时机"></a>买卖股票的最佳时机</h3><p>给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。</p>
+<p>如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。</p>
+<p>注意你不能在买入股票前卖出股票。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock">https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> maxProfit = <span class="keyword">function</span>(<span class="params">prices</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> l = prices.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">let</span> min = prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">let</span> profit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">1</span>; i &lt; l; i ++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (prices[i] &lt; min) &#123;</span><br><span class="line">            min = prices[i]</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ((prices[i] - min) &gt; profit ) &#123;</span><br><span class="line">            profit = prices[i] - min;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> profit</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="不同路径"><a href="#不同路径" class="headerlink" title="不同路径"></a>不同路径</h3><p>一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。</p>
+<p>机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。</p>
+<p>问总共有多少条不同的路径？</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> uniquePaths = <span class="keyword">function</span>(<span class="params">m, n</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> dp = <span class="title class_">Array</span>.<span class="title function_">from</span>(<span class="keyword">new</span> <span class="title class_">Array</span>(m+<span class="number">1</span>),<span class="function">() =&gt;</span> <span class="keyword">new</span> <span class="title class_">Array</span>(n+<span class="number">1</span>).<span class="title function_">fill</span>(<span class="number">0</span>))</span><br><span class="line">   <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">     dp[i][<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">     dp[<span class="number">0</span>][j] = <span class="number">1</span></span><br><span class="line">   &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">1</span>;i&lt;m;i++)&#123;</span><br><span class="line">      <span class="keyword">for</span>(<span class="keyword">let</span> j= <span class="number">1</span>;j&lt;n;j++)&#123;</span><br><span class="line">        dp[i][j] = dp[i-<span class="number">1</span>][j]+dp[i][j-<span class="number">1</span>]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[m-<span class="number">1</span>][n-<span class="number">1</span>]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/unique-paths">https://leetcode-cn.com/problems/unique-paths</a></p>
+<h3 id="剪绳子"><a href="#剪绳子" class="headerlink" title="剪绳子"></a>剪绳子</h3><p>给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n&gt;1并且m&gt;1），每段绳子的长度记为 k[0],k[1]…k[m] 。请问 k[0]<em>k[1]</em>…*k[m] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/jian-sheng-zi-lcof">https://leetcode-cn.com/problems/jian-sheng-zi-lcof</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title function_">cuttingRope</span>(n) = <span class="keyword">function</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> dp = <span class="keyword">new</span> <span class="title class_">Array</span>(n + <span class="number">1</span>).<span class="title function_">fill</span>(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">3</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">1</span>; j &lt; n; j++) &#123;</span><br><span class="line">            dp[i] = <span class="title class_">Math</span>.<span class="title function_">max</span>(dp[i], j * (i -j), j * dp[i - j])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[n]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Array"><a href="#Array" class="headerlink" title="Array"></a>Array</h2><h3 id="combination-sum"><a href="#combination-sum" class="headerlink" title="combination-sum"></a>combination-sum</h3><p>给定一个无重复元素的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合.candidates 中的数字可以无限制重复被选取。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/combination-sum">https://leetcode-cn.com/problems/combination-sum</a><br>思路: <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/combination-sum/solution/39-zu-he-zong-he-by-alexer-660/">https://leetcode-cn.com/problems/combination-sum/solution/39-zu-he-zong-he-by-alexer-660/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">candidates</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">target</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number[][]</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> combinationSum = <span class="keyword">function</span>(<span class="params">candidates, target</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> n = candidates.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">let</span> temp = [];</span><br><span class="line">    <span class="keyword">let</span> res = [];</span><br><span class="line"></span><br><span class="line">    candidates = candidates.<span class="title function_">sort</span>(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a - b);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="title function_">backtrack</span> = (<span class="params">temp, target, start</span>) =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (target === <span class="number">0</span>) &#123;</span><br><span class="line">            res.<span class="title function_">push</span>(temp);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> i = start; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (target &lt; candidates[i]) <span class="keyword">break</span>;</span><br><span class="line">            temp.<span class="title function_">push</span>(candidates[i]);</span><br><span class="line">            <span class="title function_">backtrack</span>(temp.<span class="title function_">slice</span>(), target - candidates[i], i);</span><br><span class="line">            temp.<span class="title function_">pop</span>();</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">backtrack</span>(temp, target, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>其他解法：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/combination-sum/solution/javascript-jie-fa-cong-da-dao-xiao-shi-zhi-84ms-98/">https://leetcode-cn.com/problems/combination-sum/solution/javascript-jie-fa-cong-da-dao-xiao-shi-zhi-84ms-98/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">candidates</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">target</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number[][]</span>&#125;</span></span><br><span class="line"><span class="comment"> * 64ms 100.00%</span></span><br><span class="line"><span class="comment"> * 36.3mb 83.33%</span></span><br><span class="line"><span class="comment"> * 极致简化版</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> combinationSum = <span class="keyword">function</span> (<span class="params">candidates, target</span>) &#123;</span><br><span class="line">  <span class="comment">// 由大到小排序</span></span><br><span class="line">  candidates.<span class="title function_">sort</span>(<span class="function">(<span class="params">a, b</span>) =&gt;</span> b - a);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> res = [], path = [];</span><br><span class="line">  <span class="keyword">let</span> len = candidates.<span class="property">length</span>, minNum = candidates[len - <span class="number">1</span>]; <span class="comment">// 缓存长度</span></span><br><span class="line"></span><br><span class="line">  <span class="title function_">get_combin</span>(candidates, target, <span class="number">0</span>, path);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">get_combin</span>(<span class="params">candidates, target, start, path</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (target == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> res.<span class="title function_">push</span>(path.<span class="title function_">slice</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里不用小于 0，小于最小的数就可以返回了</span></span><br><span class="line">    <span class="keyword">if</span> (target &lt; minNum) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = start; i &lt; len; i++) &#123;</span><br><span class="line">      path.<span class="title function_">push</span>(candidates[i]);</span><br><span class="line">      <span class="title function_">get_combin</span>(candidates, target - candidates[i], i, path);</span><br><span class="line">      path.<span class="title function_">pop</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="有效的括号"><a href="#有效的括号" class="headerlink" title="有效的括号"></a>有效的括号</h3><p>给定一个只包括 ‘(‘，’)’，’{‘，’}’，’[‘，’]’ 的字符串，判断字符串是否有效。</p>
+<p>有效字符串需满足：</p>
+<p>左括号必须用相同类型的右括号闭合。<br>左括号必须以正确的顺序闭合。<br>注意空字符串可被认为是有效字符串。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/valid-parentheses">https://leetcode-cn.com/problems/valid-parentheses</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">string</span>&#125; <span class="variable">s</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">boolean</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> isValid = <span class="keyword">function</span>(<span class="params">s</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> stack = [];</span><br><span class="line">    <span class="keyword">let</span> array = s.<span class="title function_">split</span>(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> e <span class="keyword">of</span> array) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="title function_">isLeft</span>(e)) &#123;</span><br><span class="line">            stack.<span class="title function_">push</span>(e)</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> last = stack[stack.<span class="property">length</span> - <span class="number">1</span>];</span><br><span class="line">            <span class="keyword">if</span> (<span class="title function_">isMatch</span>(last+e)) &#123;</span><br><span class="line">                stack.<span class="title function_">pop</span>();</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> stack.<span class="property">length</span> === <span class="number">0</span> ? <span class="literal">true</span> : <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isLeft</span> (s) &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">&#x27;(&#x27;</span>, <span class="string">&#x27;&#123;&#x27;</span>, <span class="string">&#x27;[&#x27;</span>].<span class="title function_">includes</span>(s);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isMatch</span> (s) &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">&#x27;()&#x27;</span>, <span class="string">&#x27;&#123;&#125;&#x27;</span>, <span class="string">&#x27;[]&#x27;</span>].<span class="title function_">includes</span>(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="整数反转"><a href="#整数反转" class="headerlink" title="整数反转"></a>整数反转</h3><p>给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/reverse-integer/">https://leetcode-cn.com/problems/reverse-integer/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">x</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> reverse = <span class="keyword">function</span>(<span class="params">x</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> res = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    x = <span class="built_in">parseInt</span>(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(x) &#123;</span><br><span class="line">       res = res * <span class="number">10</span> + x % <span class="number">10</span>;</span><br><span class="line">       x = <span class="built_in">parseInt</span>(x/<span class="number">10</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (res &gt; <span class="number">2147483647</span> || res &lt; -<span class="number">2147483648</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="两数之和"><a href="#两数之和" class="headerlink" title="两数之和"></a>两数之和</h3><p>给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。</p>
+<p>你可以假设每种输入只会对应一个答案。但是，你不能重复利用这个数组中同样的元素。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/two-sum">https://leetcode-cn.com/problems/two-sum</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> twoSum = <span class="keyword">function</span>(<span class="params">nums, target</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> map = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; nums.<span class="property">length</span>; i++) &#123;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">if</span> (map[target - nums[i]] &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> [map[target - nums[i]], i];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        map[nums[i]] = i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="回文数"><a href="#回文数" class="headerlink" title="回文数"></a>回文数</h3><p>判断一个整数是否是回文数。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/palindrome-number/">https://leetcode-cn.com/problems/palindrome-number/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">x</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">boolean</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> isPalindrome = <span class="keyword">function</span>(<span class="params">x</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (x &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> a = x;</span><br><span class="line">    <span class="keyword">let</span> r;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (r = <span class="number">0</span>; a !== <span class="number">0</span>; a = a/<span class="number">10</span> &gt;&gt;<span class="number">0</span>) &#123;</span><br><span class="line">        r = r * <span class="number">10</span> + a % <span class="number">10</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> r === x</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="分糖果"><a href="#分糖果" class="headerlink" title="分糖果"></a>分糖果</h3><p>老师想给孩子们分发糖果，有 N 个孩子站成了一条直线，老师会根据每个孩子的表现，预先给他们评分。</p>
+<p>你需要按照以下要求，帮助老师给这些孩子分发糖果：</p>
+<p>每个孩子至少分配到 1 个糖果。<br>相邻的孩子中，评分高的孩子必须获得更多的糖果。<br>那么这样下来，老师至少需要准备多少颗糖果呢？</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/candy">https://leetcode-cn.com/problems/candy</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">ratings</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> candy = <span class="keyword">function</span>(<span class="params">ratings</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> length = ratings.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">let</span> left = <span class="keyword">new</span> <span class="title class_">Array</span>(length).<span class="title function_">fill</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">let</span> right = <span class="keyword">new</span> <span class="title class_">Array</span>(length).<span class="title function_">fill</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">1</span>; i &lt; length; i ++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ratings[i] &gt; ratings[i - <span class="number">1</span>]) &#123;</span><br><span class="line">            left[i] = left[i - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> count = left[length - <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> k = length - <span class="number">2</span>; k &gt;= <span class="number">0</span>;  k--) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ratings[k] &gt; ratings[k + <span class="number">1</span>]) &#123;</span><br><span class="line">            right[k] = right[k + <span class="number">1</span>] + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        count += <span class="title class_">Math</span>.<span class="title function_">max</span>(left[k], right[k])</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> count;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="两个数组的交集"><a href="#两个数组的交集" class="headerlink" title="两个数组的交集"></a>两个数组的交集</h3><p>给定两个数组，编写一个函数来计算它们的交集。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/intersection-of-two-arrays/">https://leetcode-cn.com/problems/intersection-of-two-arrays/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">nums1</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">nums2</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number[]</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> intersection = <span class="keyword">function</span>(<span class="params">nums1, nums2</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> mark1 = <span class="keyword">new</span> <span class="title class_">Set</span>(nums1);</span><br><span class="line">    <span class="keyword">let</span> mark2 = <span class="keyword">new</span> <span class="title class_">Set</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, l = nums2.<span class="property">length</span>; i &lt; l; i ++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mark1.<span class="title function_">has</span>(nums2[i])) mark2.<span class="title function_">add</span>(nums2[i])</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [...mark2]</span><br><span class="line"></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="给定一个字符串，请你找出其中不含有重复字符的-最长子串的长度。"><a href="#给定一个字符串，请你找出其中不含有重复字符的-最长子串的长度。" class="headerlink" title="给定一个字符串，请你找出其中不含有重复字符的 最长子串的长度。"></a>给定一个字符串，请你找出其中不含有重复字符的 最长子串的长度。</h3><p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/">https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">string</span>&#125; <span class="variable">s</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> lengthOfLongestSubstring = <span class="keyword">function</span>(<span class="params">s</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> length = s.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">let</span> res = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, j = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (map.<span class="title function_">has</span>(s[i])) &#123;</span><br><span class="line">            j = <span class="title class_">Math</span>.<span class="title function_">max</span>(map.<span class="title function_">get</span>(s[i]), j)</span><br><span class="line">        &#125;</span><br><span class="line">        res = <span class="title class_">Math</span>.<span class="title function_">max</span>(res, i - j + <span class="number">1</span>);</span><br><span class="line">        map.<span class="title function_">set</span>(s[i], i+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="给定一个整数数组和一个整数-k，你需要找到该数组中和为-k-的连续的子数组的个数。"><a href="#给定一个整数数组和一个整数-k，你需要找到该数组中和为-k-的连续的子数组的个数。" class="headerlink" title="给定一个整数数组和一个整数 k，你需要找到该数组中和为 k 的连续的子数组的个数。"></a>给定一个整数数组和一个整数 k，你需要找到该数组中和为 k 的连续的子数组的个数。</h3><p>输入:nums &#x3D; [1,1,1], k &#x3D; 2<br>输出: 2 , [1,1] 与 [1,1] 为两种不同的情况。<br>说明 :</p>
+<p>数组的长度为 [1, 20,000]。<br>数组中元素的范围是 [-1000, 1000] ，且整数 k 的范围是 [-1e7, 1e7]。</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/subarray-sum-equals-k">https://leetcode-cn.com/problems/subarray-sum-equals-k</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number[]</span>&#125; <span class="variable">nums</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">k</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="type">number</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">var</span> subarraySum = <span class="keyword">function</span>(<span class="params">nums, k</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line">    map.<span class="title function_">set</span>(<span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">let</span> pre = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> x <span class="keyword">of</span> nums) &#123;</span><br><span class="line">        pre += x;</span><br><span class="line">        <span class="keyword">if</span> (map.<span class="title function_">has</span>(pre - k)) count += map.<span class="title function_">get</span>(pre - k);</span><br><span class="line">        <span class="keyword">if</span> (map.<span class="title function_">has</span>(pre)) &#123;</span><br><span class="line">            map.<span class="title function_">set</span>(pre, map.<span class="title function_">get</span>(pre) + <span class="number">1</span>)</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            map.<span class="title function_">set</span>(pre, <span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> count;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2019-11-25T16:00:00.000Z" data-updated="true">Tue Nov 26 2019</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/leetcode/">leetcode</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=leetcode%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+                <a class="basic-alignment left" href="/" title="Previous Post: 最近的一些感悟">« 最近的一些感悟</a>
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: webpack编译主流程初窥">webpack编译主流程初窥 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/07/25/2023-07-25/">越过了5年经验的门槛</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11/">当团队中只有一个前端</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13/">一些有趣的js编程技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/2020-06-06/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01/">四月份flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/03/27/2020-03-27/">利用git hooks快速部署node服务</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2023 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>
