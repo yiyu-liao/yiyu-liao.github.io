@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="en"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="en"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>如何理解依赖注入？</title>
+
+    <meta name="author" content="Lucas Liao">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="http://example.com/2023/08/04/2023-08-04/">
+
+    
+        <link rel="alternate" href="/atom.xml" type="application/atom+xml">
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+    <script>window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));</script>
+
+    
+    <link rel="me" href="https://twitter.com/your_twitter">
+    
+
+
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">Lucas Liao&#39;s Blog</a></h1>
+        
+    </hgroup>
+</header>
+
+<nav role="navigation">
+    
+        <ul class="subscription" data-subscription="rss">
+            <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+        </ul>
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:http://example.com/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">如何理解依赖注入？</h1>
+            <p class="meta">
+                <time datetime="2023-08-04T04:17:39.000Z" data-updated="true">Fri Aug 04 2023</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在过往工作中，使用了nestjs作为后端服务开发框架。nestjs其中显著的特点是module, service，controller之间的依赖注入，本文记录下对依赖注入原理的学习哈，加强记忆。</p>
+<h3 id="什么是依赖注入？"><a href="#什么是依赖注入？" class="headerlink" title="什么是依赖注入？"></a>什么是依赖注入？</h3><p>依赖注入是控制反转的一种技术实现。</p>
+<p>而控制反转是什么东东呢？举个例子：</p>
+<p>classA -&gt; classB</p>
+<p>classA内部使用classB的某个方法，在常规的编程下，我们一般通过以下方式进行创建：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="attr">B</span>: <span class="variable constant_">IB</span></span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">xxx</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">B</span> = <span class="keyword">new</span> <span class="title function_">IB</span>(xxx)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">dosomething</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">B</span>.<span class="title function_">dosomethingofB</span>()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>被依赖的类会在<code>constructor</code>函数进行创建，并且传入相应的参数。</p>
+<p>从上面的demo我们可以看出，需要由调用方主动去创建依赖方的实例，并且需要保证所需的参数结构。</p>
+<p>这时候我们思考一个问题，在大型的开发项目中，使用面向对象的编程思维，必然会存在错综复杂的依赖关系，所以我们需要维护两个关键代码：</p>
+<ul>
+<li>实例的创建</li>
+<li>依赖参数的改动维护</li>
+</ul>
+<p>因此，控制反转其实就是为了解决以上问题。</p>
+<p>在控制反转的模式下，我们的代码将会变成如下方式：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">B: IB</span>) &#123;&#125;</span><br><span class="line">    <span class="title function_">dosomething</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">B</span>.<span class="title function_">dosomethingofB</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到省了classB的创建过程，不需要我们主动去创建classB，而是自动被注入到classA当中，这就是依赖注入基于控制反转设计模式下的实现，目的是就是为了解耦。</p>
+<p>简单来说，依赖注入就是将一个对象所依赖的其他对象通过构造函数、方法参数或者属性注入到该对象中，而不是在该对象内部直接创建这些依赖对象。这样做的好处是，我们可以更容易地替换依赖对象，从而实现代码的可测试性和可扩展性。</p>
+<h3 id="nestjs中的实现原理"><a href="#nestjs中的实现原理" class="headerlink" title="nestjs中的实现原理"></a>nestjs中的实现原理</h3><p>从上面的demo我们只在constructor中传入B的类型，但是typescript只能是在编译是进行静态检查，如何在运行时获取相应classB的类型呢？</p>
+<p>这利用到ES7提出的Reflect metadata特性，允许在声明时候添加或获取实例的元数据，具体介绍可以Google了解学习下。</p>
+<p>它提供如下3种使用场景：</p>
+<p>design:type — 获取属性类型<br>design:paramtypes — 获取方法参数类型<br>design:returntype — 获取方法返回类型</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">User</span> () &#123;</span><br><span class="line">    <span class="meta">@Inject</span>()</span><br><span class="line">    <span class="attr">admin</span>: <span class="title class_">Admin</span></span><br><span class="line">    work (<span class="attr">time</span>: <span class="title class_">Time</span>): <span class="title class_">Boolean</span> &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">admin</span>.<span class="title function_">open</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">Reflect</span>.<span class="title function_">getMetadata</span>(<span class="string">&#x27;design:type&#x27;</span>, <span class="title class_">User</span>, <span class="string">&#x27;admin&#x27;</span>)); </span><br><span class="line"><span class="comment">// Admin</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">Reflect</span>.<span class="title function_">getMetadata</span>(<span class="string">&#x27;design:paramtypes&#x27;</span>, <span class="title class_">User</span>, <span class="string">&#x27;work&#x27;</span>));</span><br><span class="line"><span class="comment">// [Time]</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">Reflect</span>.<span class="title function_">getMetadata</span>(<span class="string">&#x27;design:returntype&#x27;</span>, <span class="title class_">User</span>, <span class="string">&#x27;work&#x27;</span>));</span><br><span class="line"><span class="comment">// Boolean</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>那么如果通过Relfect实现一个依赖注入呢？</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span>(<span class="string">&quot;reflect-metadata&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Constructor</span>&lt;T = <span class="built_in">any</span>&gt; = <span class="keyword">new</span> (...<span class="attr">args</span>: <span class="built_in">any</span>[]) =&gt; T;</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Injectable</span> = (): <span class="function"><span class="params">ClassDecorator</span> =&gt;</span> <span class="function">(<span class="params">target</span>) =&gt;</span> &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">OtherService</span> &#123;</span><br><span class="line">  a = <span class="string">&quot;a property from other service&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Injectable</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TestService</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"><span class="keyword">public</span> <span class="keyword">readonly</span> otherService: OtherService</span>) &#123;&#125;</span><br><span class="line">  <span class="title function_">testMethod</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>.<span class="property">otherService</span>.<span class="property">a</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Factory</span> = &lt;T&gt;(<span class="attr">target</span>: <span class="title class_">Constructor</span>&lt;T&gt;): <span class="function"><span class="params">T</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">// 获取所有注入的服务</span></span><br><span class="line">  <span class="keyword">const</span> providers = <span class="title class_">Reflect</span>.<span class="title function_">getMetadata</span>(<span class="string">&quot;design:paramtypes&quot;</span>, target); <span class="comment">// [OtherService]</span></span><br><span class="line">  <span class="keyword">const</span> args = providers.<span class="title function_">map</span>(<span class="function">(<span class="params">provider: Constructor</span>) =&gt;</span> <span class="keyword">new</span> <span class="title function_">provider</span>());</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title function_">target</span>(...args);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="title class_">Factory</span>(<span class="title class_">TestService</span>).<span class="title function_">testMethod</span>(); <span class="comment">// 1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>测试地址：<a target="_blank" rel="noopener" href="https://codesandbox.io/s/lingering-moon-xcw6mj?file=/src/index.ts">https://codesandbox.io/s/lingering-moon-xcw6mj?file=/src/index.ts</a></p>
+<p>在nestjs中，搭配使用<code>@Injectable</code>、<code>@Inject()</code>装饰器将class统一放到全局的IOC Container进行管理。启动服务时候，依次去取出class相应的依赖进行实例化。在实际内部中，需要维护class之间的状态，避免重复创建，单例模式等。</p>
+<h3 id="有什么坑？"><a href="#有什么坑？" class="headerlink" title="有什么坑？"></a>有什么坑？</h3><p>在pnpm monorepo下，主项目通过import方式引入libs下某个nestjs模块，在这个场景下主项目的<code>@nestjs/core</code>与libs的<code>@nestjs/core</code>不是指向同一个内存，在编译阶段导致启动失败。</p>
+<p>解决方法：将主项目node_moudles下的libs指向硬链到项目代码具体的libs位置。</p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">Lucas Liao</span></span>
+                <time datetime="2023-08-04T04:17:39.000Z" data-updated="true">Fri Aug 04 2023</time>
+                
+            </p>
+            <div class="sharing">
+    
+        <a class="twitter-share-button"
+           target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%EF%BC%9F">
+            Tweet
+        </a>
+    
+</div>
+
+            <p class="meta">
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: 越过了5年经验的门槛">越过了5年经验的门槛 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/08/04/2023-08-04/">如何理解依赖注入？</a></li><li class="post-list-item"><a class="post-list-link" href="/2023/07/25/2023-07-25/">越过了5年经验的门槛</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/11/2021-05-11/">当团队中只有一个前端</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/20/2020-09-20/">通过snabbdom原生实现简易的记账本</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-07-23/">二叉树非递归遍历学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/23/2020-8-13/">一些有趣的js编程技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/06/2020-06-06/">Lifebyte工作总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/20/2020-04-20/">typescript error handle</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/2020-04-12/">graphql</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/01/2020-04-01/">四月份flag</a></li></ul>
+</section><section class="even">
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+        <li class="loading">Status updating&#8230;</li>
+    </ul>
+
+    <a target="_blank" rel="noopener" href="https://github.com/yiyu-liao">@yiyu-liao</a> on GitHub
+
+    <script>
+        $(document).ready(function(){
+            const options = {
+                user: 'yiyu-liao',
+                count: 0,
+                skip_forks: true,
+                target: '#gh_repos'
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+
+            function render(target, repos){
+                let i, fragment = '', t = $(target)[0];
+
+                for(i = 0; i < repos.length; i++) {
+                    fragment += '<li><a href="'+repos[i].html_url+'">'+repos[i].name+'</a><p>'+escapeHtml(repos[i].description||'')+'</p></li>';
+                }
+                t.innerHTML = fragment;
+            }
+
+            $.ajax({
+                url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?",
+                dataType: 'jsonp',
+                error: function (err) {
+                    $(options.target + ' li.loading').addClass('error').text("Error loading feed");
+                },
+                success: function(data) {
+                    var repos = [];
+                    if (!data || !data.data) { return; }
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (options.skip_forks && data.data[i].fork) { continue; }
+                        repos.push(data.data[i]);
+                    }
+                    if (options.count) { repos.splice(options.count); }
+                    render(options.target, repos);
+                }
+            });
+        });
+    </script>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2023 - Lucas Liao -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>
